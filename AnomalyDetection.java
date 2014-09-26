@@ -29,7 +29,7 @@ class AnomalyDetection {
 	}
 	
 	// Runs the anomaly detection algorithm on the test examples.
-	private static void detect(RealMatrix examples, RealVector mean, RealVector stddev, double threshold) {
+	public static void detect(RealMatrix examples, RealVector mean, RealVector stddev, double threshold) {
 		final int features = examples.getColumnDimension();
 		for( int i = 0; i < numTestExamples; i++ ) {
 			double probability = 1;
@@ -44,7 +44,7 @@ class AnomalyDetection {
 	}
 	
 	// Calculates the probability of the given x in the normal distribution N(mean,stddev).
-	public static double normalProbability(double x, double mean, double stddev) {
+	private static double normalProbability(double x, double mean, double stddev) {
 		return new NormalDistribution(mean,stddev).density(x);
 	}
 	
@@ -73,7 +73,7 @@ class AnomalyDetection {
 	}
 	
 	// Calculates the given statistic per feature.
-	protected static ArrayRealVector calculateStatistic(RealMatrix examples, AbstractStorelessUnivariateStatistic statistic) throws IllegalArgumentException {
+	public static ArrayRealVector calculateStatistic(RealMatrix examples, AbstractStorelessUnivariateStatistic statistic) throws IllegalArgumentException {
 		int rows = examples.getRowDimension(), cols = examples.getColumnDimension();
 		double[] means = new double[cols];
 		for( int i = 0; i < cols; i++ ) {
