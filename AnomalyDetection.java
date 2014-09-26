@@ -12,10 +12,11 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 class AnomalyDetection {
-	static double epsilon;
-	static BlockRealMatrix trainingExamples, testExamples;
-	static ArrayRealVector mean, stddev;
-	static int numTestExamples;
+	protected static double epsilon;
+	protected static BlockRealMatrix trainingExamples, testExamples;
+	protected static ArrayRealVector mean, stddev;
+	protected static int numTestExamples;
+	
 	public static void main(String[] args) throws IOException {
 		epsilon = Double.parseDouble(args[0]);
 		trainingExamples = readExamples("anomalytraining.txt");
@@ -28,7 +29,7 @@ class AnomalyDetection {
 	}
 	
 	// Runs the anomaly detection algorithm on the test examples.
-	public static void detect(BlockRealMatrix examples, ArrayRealVector mean, ArrayRealVector stddev, double threshold) {
+	private static void detect(RealMatrix examples, RealVector mean, RealVector stddev, double threshold) {
 		final int features = examples.getColumnDimension();
 		for( int i = 0; i < numTestExamples; i++ ) {
 			double probability = 1;
@@ -72,7 +73,7 @@ class AnomalyDetection {
 	}
 	
 	// Calculates the given statistic per feature.
-	public static ArrayRealVector calculateStatistic(BlockRealMatrix examples, AbstractStorelessUnivariateStatistic statistic) throws IllegalArgumentException {
+	protected static ArrayRealVector calculateStatistic(RealMatrix examples, AbstractStorelessUnivariateStatistic statistic) throws IllegalArgumentException {
 		int rows = examples.getRowDimension(), cols = examples.getColumnDimension();
 		double[] means = new double[cols];
 		for( int i = 0; i < cols; i++ ) {
