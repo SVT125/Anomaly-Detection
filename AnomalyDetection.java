@@ -12,13 +12,20 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 class AnomalyDetection {
-	protected static double epsilon;
-	protected static BlockRealMatrix trainingExamples, testExamples;
-	protected static ArrayRealVector mean, stddev;
-	protected static int numTestExamples;
+	protected double epsilon;
+	protected BlockRealMatrix trainingExamples, testExamples;
+	protected ArrayRealVector mean, stddev;
+	protected int numTestExamples;
+	protected String trainingFileName, testFileName;
 	
-	public static void main(String[] args) throws IOException {
-		epsilon = Double.parseDouble(args[0]);
+	public AnomalyDetection(String trainingFileName, String testFileName, double epsilon) {
+		this.trainingFileName = trainingFileName;
+		this.testFileName = testFileName;
+		this.epsilon = epsilon;
+	}
+	
+	// Run the anomaly detection algorithm.
+	public void runAlgorithm() throws IOException {
 		trainingExamples = readExamples("anomalytraining.txt");
 		testExamples = readExamples("anomalytest.txt");
 		numTestExamples = testExamples.getRowDimension();
@@ -29,7 +36,7 @@ class AnomalyDetection {
 	}
 	
 	// Runs the anomaly detection algorithm on the test examples.
-	public static void detect(RealMatrix examples, RealVector mean, RealVector stddev, double threshold) {
+	private void detect(RealMatrix examples, RealVector mean, RealVector stddev, double threshold) {
 		final int features = examples.getColumnDimension();
 		for( int i = 0; i < numTestExamples; i++ ) {
 			double probability = 1;
@@ -44,12 +51,12 @@ class AnomalyDetection {
 	}
 	
 	// Calculates the probability of the given x in the normal distribution N(mean,stddev).
-	private static double normalProbability(double x, double mean, double stddev) {
+	private double normalProbability(double x, double mean, double stddev) {
 		return new NormalDistribution(mean,stddev).density(x);
 	}
 	
 	// Reads in all the examples, given the file name, as a BlockRealMatrix splitting by whitespaces.
-	public static BlockRealMatrix readExamples(String fileName) throws IOException {
+	public BlockRealMatrix readExamples(String fileName) throws IOException {
 		List<List<Double>> list = new ArrayList<List<Double>>();
 		File f = new File(fileName);
 		BufferedReader br = new BufferedReader(new FileReader(f));
@@ -73,7 +80,7 @@ class AnomalyDetection {
 	}
 	
 	// Calculates the given statistic per feature.
-	public static ArrayRealVector calculateStatistic(RealMatrix examples, AbstractStorelessUnivariateStatistic statistic) throws IllegalArgumentException {
+	protected ArrayRealVector calculateStatistic(RealMatrix examples, AbstractStorelessUnivariateStatistic statistic) throws IllegalArgumentException {
 		int rows = examples.getRowDimension(), cols = examples.getColumnDimension();
 		double[] means = new double[cols];
 		for( int i = 0; i < cols; i++ ) {

@@ -9,11 +9,16 @@ import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.stat.correlation.Covariance;
 
 class MultivariateAnomalyDetection extends AnomalyDetection {
-	private static RealMatrix covariance;
-	public static void main(String[] args) throws IOException {
-		epsilon = Double.parseDouble(args[0]);
-		trainingExamples = readExamples("anomalytraining.txt");
-		testExamples = readExamples("anomalytest.txt");
+	private RealMatrix covariance;
+	
+	public MultivariateAnomalyDetection(String trainingFileName, String testFileName, double epsilon) {
+		super(trainingFileName,testFileName,epsilon);
+	}
+	
+	// Run the multivariate anomaly detection algorithm.
+	public void runMultivariateAlgorithm() throws IOException {
+		trainingExamples = readExamples(trainingFileName);
+		testExamples = readExamples(testFileName);
 		numTestExamples = testExamples.getRowDimension();
 		mean = calculateStatistic(trainingExamples, new Mean());
 		covariance = calculateCovariance(trainingExamples);
@@ -22,12 +27,12 @@ class MultivariateAnomalyDetection extends AnomalyDetection {
 	}
 	
 	// Calculates the covariance matrix given the examples.
-	private static RealMatrix calculateCovariance(RealMatrix examples) {
+	private RealMatrix calculateCovariance(RealMatrix examples) {
 		return new Covariance(examples).getCovarianceMatrix();
 	}
 	
 	// Runs the anomaly detection algorithm on the test examples.
-	private static void detect(RealMatrix examples, RealVector mean, RealMatrix cov, double threshold) {
+	private void detect(RealMatrix examples, RealVector mean, RealMatrix cov, double threshold) {
 		final int features = examples.getColumnDimension();
 		for( int i = 0; i < numTestExamples; i++ ) {
 			RealVector example = examples.getRowVector(i);
@@ -40,7 +45,7 @@ class MultivariateAnomalyDetection extends AnomalyDetection {
 	}
 	
 	// Calculates the probability of the given x in the normal distribution N(mean,stddev).
-	private static double normalProbability(double[] x, RealVector mean, RealMatrix cov) {
+	private double normalProbability(double[] x, RealVector mean, RealMatrix cov) {
 		return new MultivariateNormalDistribution(mean.toArray(),cov.getData()).density(x);
 	}
 }
