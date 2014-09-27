@@ -26,8 +26,8 @@ class AnomalyDetection {
 	
 	// Run the anomaly detection algorithm.
 	public void runAlgorithm() throws IOException {
-		trainingExamples = readExamples("anomalytraining.txt");
-		testExamples = readExamples("anomalytest.txt");
+		trainingExamples = readExamples(trainingFileName);
+		testExamples = readExamples(testFileName);
 		numTestExamples = testExamples.getRowDimension();
 		mean = calculateStatistic(trainingExamples, new Mean());
 		stddev = calculateStatistic(trainingExamples, new StandardDeviation());
