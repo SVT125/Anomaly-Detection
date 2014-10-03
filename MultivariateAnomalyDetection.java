@@ -16,14 +16,14 @@ class MultivariateAnomalyDetection extends AnomalyDetection {
 	}
 	
 	// Run the multivariate anomaly detection algorithm.
-	public void runMultivariateAlgorithm() throws IOException {
+	public boolean[] runMultivariateAlgorithm() throws IOException {
 		trainingExamples = readExamples(trainingFileName);
 		testExamples = readExamples(testFileName);
 		numTestExamples = testExamples.getRowDimension();
 		mean = calculateStatistic(trainingExamples, new Mean());
 		covariance = calculateCovariance(trainingExamples);
 		System.out.println("The given threshold is: " + epsilon);
-		detect(testExamples,mean,covariance,epsilon);		
+		return detect(testExamples,mean,covariance,epsilon);		
 	}
 	
 	// Calculates the covariance matrix given the examples.
@@ -32,16 +32,18 @@ class MultivariateAnomalyDetection extends AnomalyDetection {
 	}
 	
 	// Runs the anomaly detection algorithm on the test examples.
-	private void detect(RealMatrix examples, RealVector mean, RealMatrix cov, double threshold) {
+	private boolean[] detect(RealMatrix examples, RealVector mean, RealMatrix cov, double threshold) {
+		boolean[] results = new boolean[numTestExamples];
 		final int features = examples.getColumnDimension();
 		for( int i = 0; i < numTestExamples; i++ ) {
 			RealVector example = examples.getRowVector(i);
 				double probability = normalProbability(example.toArray(),mean,cov);
-				if(probability < threshold)
-					System.out.println("Example " + (i+1) + " is an anomaly: " + true + ". Probability: " + probability);
-				else
-					System.out.println("Example " + (i+1) + " is an anomaly: " + false + ". Probability: " + probability);
+			if(probability < threshold)
+				results[i] = true;
+			else
+				results[i] = false;
 		}
+		return results;
 	}
 	
 	// Calculates the probability of the given x in the normal distribution N(mean,stddev).

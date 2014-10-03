@@ -11,7 +11,11 @@ import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
-class AnomalyDetection {
+interface MLAlgorithm {
+	public boolean[] runAlgorithm() throws IOException;
+}
+
+class AnomalyDetection implements MLAlgorithm {
 	protected double epsilon;
 	protected BlockRealMatrix trainingExamples, testExamples;
 	protected ArrayRealVector mean, stddev;
@@ -25,18 +29,19 @@ class AnomalyDetection {
 	}
 	
 	// Run the anomaly detection algorithm.
-	public void runAlgorithm() throws IOException {
+	public boolean[] runAlgorithm() throws IOException {
 		trainingExamples = readExamples(trainingFileName);
 		testExamples = readExamples(testFileName);
 		numTestExamples = testExamples.getRowDimension();
 		mean = calculateStatistic(trainingExamples, new Mean());
 		stddev = calculateStatistic(trainingExamples, new StandardDeviation());
 		System.out.println("The given threshold is: " + epsilon);
-		detect(testExamples,mean,stddev,epsilon);		
+		return detect(testExamples,mean,stddev,epsilon);		
 	}
 	
-	// Runs the anomaly detection algorithm on the test examples.
-	private void detect(RealMatrix examples, RealVector mean, RealVector stddev, double threshold) {
+	// Alternate version of the anomaly detection algorithm, returns results for evaluation metrics.
+	private boolean[] detect(RealMatrix examples, RealVector mean, RealVector stddev, double threshold) {
+		boolean[] results = new boolean[numTestExamples];
 		final int features = examples.getColumnDimension();
 		for( int i = 0; i < numTestExamples; i++ ) {
 			double probability = 1;
@@ -44,10 +49,11 @@ class AnomalyDetection {
 			for( int j = 0; j < features; j++ )
 				probability = probability * normalProbability(example.getEntry(j),mean.getEntry(j),stddev.getEntry(j));
 			if(probability < threshold)
-				System.out.println("Example " + (i+1) + " is an anomaly: " + true + ". Probability: " + probability);
+				results[i] = true;
 			else
-				System.out.println("Example " + (i+1) + " is an anomaly: " + false + ". Probability: " + probability);
+				results[i] = false;
 		}
+		return results;
 	}
 	
 	// Calculates the probability of the given x in the normal distribution N(mean,stddev).
